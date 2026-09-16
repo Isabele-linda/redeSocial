@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ""
     );
 
-    // Começa em 9999 para que ao curtir vá para 10000 (exibindo "10K")
+    // Começa em 9999 para que ao curtir vá para 10000 (ou ajuste conforme preferir)
     let baseLikes = 9999;
     let maxLikes = 10000;
     let minLikes = 0;
@@ -74,10 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Evento de clique no BOTÃO DE CORAÇÃO (Curte ou Descurte)
     likeBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        addLike();
+        addLike(); // Reaproveitando a mesma lógica central para evitar código duplicado
     });
 
-    // Evento de clique na IMAGEM PRINCIPAL (Soma ou subtrai o like alternadamente)
+    // Evento de clique na IMAGEM PRINCIPAL
     if (postMedia) {
         postMedia.addEventListener("click", (e) => {
             e.stopPropagation();
