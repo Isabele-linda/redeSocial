@@ -1,108 +1,116 @@
-//Botao curtidas
-document.addEventListener("DOMContentLoaded", () =>{
+
+// Lógica de curtidas, animações e interações
+document.addEventListener("DOMContentLoaded", () => {
     const likeBtn = document.querySelector(".left-actions .action-btn:first-child");
+    const postMedia = document.querySelector(".post-media");
+    const bookmarkBtn = document.querySelector(".post-actions > .action-btn:last-child");
+
     if (!likeBtn) return;
     const likeSvg = likeBtn.querySelector("svg");
 
-	
-    //localiza o contador
+    // Localiza o nó de texto do botão para atualizar o contador
+    let textNode = Array.from(likeBtn.childNodes).find(node => 
+        node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ""
+    );
 
-    let textNode = Array.from(likeBtn.childNodes).find(node) => node.nodeType
-    === Node.TEXT_NODE && node.textContent.trim() !== ""
-);
+    // Começa do 0 conforme solicitado
+    let baseLikes = 0;
+    let isLiked = false;
 
-//zera o contador
-let cont = 0;
-
-//atualiza
-if(textNode){
-    textNode.textContent = `0`;
-}
-
-//coração
-function applyLikedStyle (){
-likeSvg.style.fill = "#ef4444";
-likeSvg.style.stroke = "#ef4444";
-likeSvg.style.color = "#ef4444";
-
-
-//efeito curtida
-likeSvg.style.transform = "scale(1.3)";
-setTimeout(() => (likeSvg.style.transform = "scale(1)")150);
-}
-
-//para números acima de 1000
-
-function formatLikes(num){
-    if(num >=1000){
-        return (num/1000).toFixed(1)+"K";
+    // Define o valor inicial como 0 no elemento de texto
+    if (textNode) {
+        textNode.textContent = ` ${baseLikes}`;
     }
-    return num.toString();
-}
 
-//incrementar a curtida
-
-function addLike(){
-    baseLikes++;
-    isLiked = true;
-    likeBtn.classList.add("liked");
-
-    if(likesCountSpan){
-        likesCountSpan.textContent = formatLikes(baseLikes);
+    // Formata números para formato abreviado se ultrapassarem 1000
+    function formatLikes(num) {
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1) + "K";
+        }
+        return num.toString();
     }
-}
 
-// Efeito visual de animação (bounce) no coração.
-const svg = likeBtn.querySelector("svg");
-if (svg) {
-svg.style.transform = "scale(1.4)";
-setTimeout(() => {
-svg.style.transform = "scale(1)";
-}, 150);
-}
-}
+    // Aplica o estilo e animação (bounce) no coração
+    function applyLikedStyle(liked) {
+        if (liked) {
+            likeSvg.style.fill = "#ef4444";
+            likeSvg.style.stroke = "#ef4444";
+            likeSvg.style.color = "#ef4444";
+        } else {
+            likeSvg.style.fill = "none";
+            likeSvg.style.stroke = "currentColor";
+            likeSvg.style.color = "#ffffff";
+        }
 
-// Evento de clique no BOTÃO DE CORAÇÃO (Curte ou Descurte)
-likeBtn.addEventListener("click", (e) => {
-e.stopPropagation();
+        // Efeito visual de escala
+        likeSvg.style.transform = "scale(1.4)";
+        setTimeout(() => {
+            likeSvg.style.transform = "scale(1)";
+        }, 150);
+    }
 
-if (isLiked) {
-// Se já estava curtido, descurte (-1)
-isLiked = false;
-baseLikes = Math.max(0, baseLikes - 1);
-likeBtn.classList.remove("liked");
-if (likesCountSpan) {
-likesCountSpan.textContent = formatLikes(baseLikes);
-}
-} else {
-// Se não estava curtido, adiciona curtida
-addLike();
-}
+    // Função central para incrementar/adicionar curtida (usada pela imagem principal)
+    function addLike() {
+        if (!isLiked) {
+            baseLikes++;
+            isLiked = true;
+            likeBtn.classList.add("liked");
+            applyLikedStyle(true);
+        } else {
+            baseLikes = Math.max(0, baseLikes - 1);
+            isLiked = false;
+            likeBtn.classList.remove("liked");
+            applyLikedStyle(false);
+        }
+
+        if (textNode) {
+            textNode.textContent = ` ${formatLikes(baseLikes)}`;
+        }
+    }
+
+    // Evento de clique no BOTÃO DE CORAÇÃO (Curte ou Descurte)
+    likeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        isLiked = !isLiked;
+        if (isLiked) {
+            baseLikes++;
+            likeBtn.classList.add("liked");
+            applyLikedStyle(true);
+        } else {
+            baseLikes = Math.max(0, baseLikes - 1);
+            likeBtn.classList.remove("liked");
+            applyLikedStyle(false);
+        }
+
+        if (textNode) {
+            textNode.textContent = ` ${formatLikes(baseLikes)}`;
+        }
+    });
+
+    // Evento de clique na IMAGEM PRINCIPAL (Soma ou subtrai o like alternadamente)
+    if (postMedia) {
+        postMedia.addEventListener("click", (e) => {
+            e.stopPropagation();
+            addLike();
+        });
+    }
+
+    // Evento no botão de SALVAR (Bookmark)
+    if (bookmarkBtn) {
+        let isBookmarked = false;
+        bookmarkBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            isBookmarked = !isBookmarked;
+            bookmarkBtn.classList.toggle("bookmarked", isBookmarked);
+
+            const svgBookmark = bookmarkBtn.querySelector("svg");
+            if (svgBookmark) {
+                svgBookmark.style.transform = "scale(1.2)";
+                setTimeout(() => {
+                    svgBookmark.style.transform = "scale(1)";
+                }, 150);
+            }
+        });
+    }
 });
-
-// Evento de clique na IMAGEM PRINCIPAL (Sempre aumenta likes)
-if (postMedia) {
-postMedia.addEventListener("click", (e) => {
-e.stopPropagation();
-addLike();
-});
-}
-
-// Evento no botão de SALVAR (Bookmark)[cite: 1]
-if (bookmarkBtn) {
-let isBookmarked = false;
-bookmarkBtn.addEventListener("click", (e) => {
-e.stopPropagation();
-isBookmarked = !isBookmarked;
-bookmarkBtn.classList.toggle("bookmarked", isBookmarked);
-
-const svg = bookmarkBtn.querySelector("svg");
-if (svg) {
-svg.style.transform = "scale(1.2)";
-setTimeout(() => {
-svg.style.transform = "scale(1)";
-}, 150);
-}
-});
-}
-
