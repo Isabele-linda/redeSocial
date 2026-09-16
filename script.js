@@ -1,4 +1,3 @@
-
 // Lógica de curtidas, animações e interações
 document.addEventListener("DOMContentLoaded", () => {
     const likeBtn = document.querySelector(".left-actions .action-btn:first-child");
@@ -13,19 +12,21 @@ document.addEventListener("DOMContentLoaded", () => {
         node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ""
     );
 
-    // Começa do 0 conforme solicitado
-    let baseLikes = 0;
+    // Começa em 9999 para que ao curtir vá para 10000 (exibindo "10K")
+    let baseLikes = 9999;
+    let maxLikes = 10000;
+    let minLikes = 0;
     let isLiked = false;
 
-    // Define o valor inicial como 0 no elemento de texto
+    // Define o valor inicial no elemento de texto
     if (textNode) {
-        textNode.textContent = ` ${baseLikes}`;
+        textNode.textContent = ` ${formatLikes(baseLikes)}`;
     }
 
     // Formata números para formato abreviado se ultrapassarem 1000
     function formatLikes(num) {
         if (num >= 1000) {
-            return (num / 1000).toFixed(1) + "K";
+            return (num / 1000).toFixed(num % 1000 !== 0 ? 1 : 0) + "K";
         }
         return num.toString();
     }
@@ -49,15 +50,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 150);
     }
 
-    // Função central para incrementar/adicionar curtida (usada pela imagem principal)
+    // Função central para incrementar/adicionar curtida
     function addLike() {
         if (!isLiked) {
-            baseLikes++;
+            if (baseLikes < maxLikes) {
+                baseLikes++;
+            }
             isLiked = true;
             likeBtn.classList.add("liked");
             applyLikedStyle(true);
         } else {
-            baseLikes = Math.max(0, baseLikes - 1);
+            baseLikes = Math.max(minLikes, baseLikes - 1);
             isLiked = false;
             likeBtn.classList.remove("liked");
             applyLikedStyle(false);
@@ -71,21 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Evento de clique no BOTÃO DE CORAÇÃO (Curte ou Descurte)
     likeBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-
-        isLiked = !isLiked;
-        if (isLiked) {
-            baseLikes++;
-            likeBtn.classList.add("liked");
-            applyLikedStyle(true);
-        } else {
-            baseLikes = Math.max(0, baseLikes - 1);
-            likeBtn.classList.remove("liked");
-            applyLikedStyle(false);
-        }
-
-        if (textNode) {
-            textNode.textContent = ` ${formatLikes(baseLikes)}`;
-        }
+        addLike();
     });
 
     // Evento de clique na IMAGEM PRINCIPAL (Soma ou subtrai o like alternadamente)
